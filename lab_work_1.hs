@@ -30,7 +30,9 @@ myInit (x:xs) = x:(init xs)
 --6---
 myReverse :: [a] -> [a]
 myReverse [] = []
-myReverse xs = 
+myReverse xs = helper xs [] where
+    helper [] ys = ys
+    helper (x:xs) ys = helper xs (x:ys)
 
 --7--
 myLength :: [a] -> Integer
