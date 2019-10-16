@@ -25,9 +25,9 @@ myTail (_:xs) = xs
 myInit :: [a] -> [a]
 myInit [] = error "Empty list"
 myInit [x] = []
-myInit (x:xs) = x:(init xs)
+myInit (x:xs) = x:(myInit xs)
 
---6---
+--6--
 myReverse :: [a] -> [a]
 myReverse [] = []
 myReverse xs = helper xs [] where
@@ -42,9 +42,9 @@ myLength xs = helper 0 xs where
 
 --8---
 myAppend :: [a] -> a -> [a]
-myAppend xs y = helper xs [y] where
+myAppend xs y = myReverse (y : (helper xs [])) where
     helper [] acc = acc
-    helper xss acc = helper (myInit xss) ((myLast xss) : acc)
+    helper (x:xss) acc = helper xss (x:acc)
 
 --9---
 myConcat :: [a] -> [a] -> [a]
