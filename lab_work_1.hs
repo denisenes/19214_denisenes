@@ -80,9 +80,8 @@ myElem (x:xs) y = if x == y then True else myElem xs y
 
 --15--
 myFilter :: (a -> Bool) -> [a] -> [a]
-myFilter f xs = helper f (myReverse xs) [] where
-    helper _ [] ys = ys
-    helper ff (x:xss) ys = if (ff x) == True then helper ff xss (x:ys) else helper f xss ys
+myFilter f [] = []
+myFilter f (x:xs) = if (f x) then (x:(myFilter f xs)) else myFilter f xs
 
 --16--
 myMap :: (a -> b) -> [a] -> [b]
