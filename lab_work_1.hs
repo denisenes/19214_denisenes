@@ -38,18 +38,18 @@ myReverse xs = helper xs [] where
 myLength :: [a] -> Integer
 myLength xs = helper 0 xs where
     helper acc [] = acc
-    helper acc xss = helper (acc + 1) (myTail xss)
+    helper acc (x:xs) = helper (acc + 1) xs
 
 --8---
 myAppend :: [a] -> a -> [a]
-myAppend xs y = myReverse (y : (helper xs [])) where
-    helper [] acc = acc
-    helper (x:xss) acc = helper xss (x:acc)
+myAppend [] y = [y]
+myAppend (x:xs) y = (x:(myAppend xs y))
 
 --9---
 myConcat :: [a] -> [a] -> [a]
-myConcat [] ys = ys
-myConcat xs ys = myConcat (myInit xs) ((myLast xs) : ys)
+myConcat xs ys = helper xs ys where
+    helper [] yss = yss
+    helper (x:xss) yss = x:(helper xss yss)
 
 --10--
 myDrop :: Integer -> [a] -> [a]
@@ -59,9 +59,9 @@ myDrop n (_:xs) = myDrop (n - 1) xs
 
 --11--
 myTake :: Integer -> [a] -> [a]
-myTake n xs = myReverse (helper n xs []) where
-    helper 0 _ yss = yss
-    helper nn (x:xss) yss = helper (nn-1) xss (x:yss)
+myTake n xs = helper n xs where
+    helper 0 _ = []
+    helper nn (x:xss) = x:(helper (nn-1) xss)
 
 --12--
 mySplitAt :: Integer -> [a] -> ([a], [a])
