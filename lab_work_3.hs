@@ -4,7 +4,7 @@ data QuantumState a = QuantumState a String
 type Qubit a = [QuantumState a]
 
 
------------Interface-header----------------------------------------------------------------
+-----------Classes-header----------------------------------------------------------------
 instance (Eq a) => Eq (Complex a) where
     (Complex real1 imag1) == (Complex real2 imag2) = (real1 == real2) && (imag1 == imag2)
 
@@ -16,6 +16,17 @@ instance (Show a) => Show (QuantumState a) where
 
 instance (Eq a) => Eq (QuantumState a) where
     (QuantumState complex1 label1) == (QuantumState complex2 label2) = (complex1 == complex2) && (label1 == label2)
+
+instance (Num a, Eq a, Ord a) => Num (Complex a) where
+    --(+):: (Num a) => Complex a -> Complex a -> Complex a
+    (+) (Complex real1 image1) (Complex real2 image2) = Complex (real1 + real2) (image1 + image2)
+    --(*):: (Num a) => Complex a -> Complex a -> Complex a
+    (*) (Complex real1 image1) (Complex real2 image2) = (Complex (real1*real1 - image1*image2) (image2*real2 + real1*image1))
+    abs (Complex real image) = (Complex (real*real + image*image) 0)
+    signum (Complex real image) | real < 0 = (Complex (-1) 0)
+                                | real == 0 = (Complex 0 0)
+                                | real > 0 = (Complex 1 0)
+    negate (Complex real image) = (Complex (-real) image)
 
 instance Functor QuantumState where
     fmap f (QuantumState complex label) = QuantumState (f complex) label
@@ -43,19 +54,12 @@ fromPairList:: [(Complex a, String)] -> Qubit (Complex a)
 fromPairList [] = []
 fromPairList ((complex, str):xs) = (QuantumState complex str):fromPairList xs
 
-scalarProduct:: (Num a) => Qubit (Complex a) ->Qubit (Complex a) -> (Complex a)
-scalarProduct [] [] = Complex 0 0
-scalarProduct ((QuantumState comp1 _):xs) ((QuantumState comp2 _):ys) = mplus (mproduct comp1 comp2) (scalarProduct xs ys) where
-    --mplus:: (Num a) => Complex a -> Complex a -> Complex a
-    mplus (Complex real1 image1) (Complex real2 image2) = Complex (real1 + real2) (image1 + image2)
-    --mproduct:: (Num a) => Complex a -> Complex a -> Complex a
-    mproduct (Complex real1 image1) (Complex real2 image2) = (Complex (real1*real1 - image1*image2) (image2*real2 + real1*image1))
+scalarProduct:: (Num a, Ord a) => Qubit (Complex a) -> Qubit (Complex a) -> (Complex a)
+scalarProduct xs ys = foldl1 (+) (zipWith (\(QuantumState comp1 _) (QuantumState comp2 _) -> comp1 * comp2) xs ys)
 
-entagle:: (Num a) => Qubit (Complex a) -> Qubit (Complex a) -> Qubit (Complex a)
+entagle:: (Num a, Ord a, Eq a) => Qubit (Complex a) -> Qubit (Complex a) -> Qubit (Complex a)
 entagle [] [] = []
-entagle ((QuantumState complex1 label1):xs) ((QuantumState complex2 label2):ys) = ((QuantumState (mproduct complex1 complex2) (label1++label2)):entagle xs ys) where
---mproduct:: (Num a) => Complex a -> Complex a -> Complex a
-    mproduct (Complex real1 image1) (Complex real2 image2) = (Complex (real1*real1 - image1*image2) (image2*real2 + real1*image1))
+entagle xs ys = [(QuantumState (c1*c2) (l1++l2))  | (QuantumState c1 l1) <- xs, (QuantumState c2 l2) <- ys]
 
 
 x = (Complex 4 7)
@@ -64,7 +68,7 @@ y = (Complex 1 3)
 q = QuantumState x "uuu"
 w = QuantumState y "www"
 q2 = QuantumState x "aaa"
-q3 = QuantumState (Complex 12 32) "cucold"
+q3 = QuantumState (Complex 12 32) "cucu"
 
 qubit = [q, q2, q3]
 qub = [q, w]
